@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import s from './App.module.css';
 
 import { Section } from "./Section/Section";
@@ -7,42 +8,29 @@ import { ContactForm } from "./ContactForm/ContactForm";
 import { ContactList } from "./ContactList/ContactList";
 import { Filter } from "./Filter/Filter";
 
-import { save, load } from "./utils/storage";
-import initialContacts from "./utils/contacts.json";
+import { save } from 'utils/storage';
 
-import { Notify } from "notiflix";
-import { nanoid } from "nanoid";
+import { addContact, deleteContact } from 'redux/contactsSlice';
+import { setFilter } from 'redux/filterSlice';
 
-const INITIAL_STATE = {
-    contacts: initialContacts,
-    filter: '',
-};
+import { selectContacts, selectFilters } from 'redux/selectors';
+
 export const App = () => {
+    const dispatch = useDispatch();
+    const { contacts } = useSelector(selectContacts);
+    const { filter } = useSelector(selectFilters);
 
-    const [contacts, setContacts] = useState(load('contacts') ?? INITIAL_STATE.contacts);
-    const [filter, setFilter] = useState(INITIAL_STATE.filter);
+    useEffect(() => {
+        save('contacts', contacts);
+    }, [contacts]);
 
-    const addContact = (data) => {
-        const { name, number } = data;
-
-        const newContact = {
-            id: nanoid(6),
-            name,
-            number,
-        };
-
-        if (contacts.find(contact => contact.name === name)) {
-            Notify.failure(`${name} is already in contacts!`);
-            return;
-        }
-
-        setContacts([...contacts, newContact]);
-
-        Notify.success(`New contact has been added! Name: ${newContact.name}, Phone number: ${newContact.number}.`);
-    };
 
     const onChangeFilter = event => {
-        setFilter(event.currentTarget.value);
+        dispatch(
+            setFilter({
+                filter: event.currentTarget.value,
+            }),
+        );
     };
 
     const getFilteredContacts = () => {
@@ -50,30 +38,14 @@ export const App = () => {
     };
 
     const clearContact = id => {
-
-        const contact = contacts.find(el => el.id === id);
-
-        if (contact) {
-            const { name, number } = contact;
-
-            setContacts(contacts.filter(contact => contact.id !== id));
-    
-            Notify.warning(`Contact has been deleted! Name: ${name}, Phone number: ${number}.`);
-        }
+        dispatch(
+            deleteContact({
+                id,
+            })
+        );
     };
 
     const filteredContacts = getFilteredContacts();
-
-    useEffect(() => {
-        const parsedContacts = load('contacts');
-        if (parsedContacts) {
-            setContacts(parsedContacts);
-        }
-    }, []);
-
-    useEffect(() => {
-        save('contacts', contacts);
-    }, [contacts]);
 
     return (
         <div className={s.container}>
