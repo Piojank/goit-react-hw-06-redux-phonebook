@@ -28,13 +28,18 @@ const contactsSlice = createSlice({
         },
         
         deleteContact: (state, action) => {
-            const { id, name, number } = action.payload;
+            const { id } = action.payload;
 
-            state.contacts = state.contacts.filter(
-                contact => contact.id !== id
-            );
+            const contact = state.contacts.find(el => el.id === id);
 
-            Notify.warning(`Contact has been deleted! Name: ${name}, Phone number: ${number}.`);
+            if (contact) {
+
+                const { name, number } = contact;
+
+                state.contacts = state.contacts.filter(contact => contact.id !== id);
+    
+                Notify.warning(`Contact has been deleted! Name: ${name}, Phone number: ${number}.`);
+            };
         },
     },
 });

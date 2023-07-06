@@ -33,8 +33,15 @@ export const App = () => {
         );
     };
 
-    const getFilteredContacts = () => {
-        return contacts.filter(contact => contact.name.toLowerCase().includes(filter.toLowerCase()));
+    const handleSubmit = event => {
+        const name = event.name;
+        const number = event.number;
+        dispatch(
+            addContact({
+                name,
+                number,
+            })
+        );
     };
 
     const clearContact = id => {
@@ -45,12 +52,16 @@ export const App = () => {
         );
     };
 
+    const getFilteredContacts = () => {
+        return contacts.filter(contact => contact.name.toLowerCase().includes(filter.toLowerCase()));
+    };
+
     const filteredContacts = getFilteredContacts();
 
     return (
         <div className={s.container}>
             <Section title="Phonebook">
-                <ContactForm handleSubmit={addContact}/>
+                <ContactForm handleSubmit={handleSubmit}/>
             </Section>
             <Section title="Contacts">
                 {contacts.length > 1 && <Filter value={filter} onChange={onChangeFilter} /> }
